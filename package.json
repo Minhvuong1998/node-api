@@ -1,0 +1,50 @@
+{
+  "name": "blog-source",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node dst/server.js",
+    "build": "rimraf dst/ && tsc",
+    "check": "eslint --ext .ts src/ && prettier --check src/",
+    "fix": "eslint --ext .ts --fix",
+    "format": "prettier --write src/"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/cors": "^2.8.10",
+    "@types/express": "^4.17.11",
+    "@types/lodash": "^4.14.168",
+    "@types/multer": "^1.4.5",
+    "@types/passport": "^1.0.6",
+    "@types/passport-jwt": "^3.0.5",
+    "@typescript-eslint/eslint-plugin": "^4.22.0",
+    "@typescript-eslint/parser": "^4.22.0",
+    "eslint": "^7.25.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "prettier": "2.2.1",
+    "typescript": "^4.2.4"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-validator": "^6.10.1",
+    "http-status": "^1.5.0",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.21",
+    "module-alias": "^2.2.2",
+    "mongoose": "^5.12.5",
+    "multer": "^1.4.2",
+    "passport": "^0.4.1",
+    "passport-jwt": "^4.0.0",
+    "rimraf": "^3.0.2"
+  },
+  "_moduleAliases": {
+    "@validators": "dst/validators",
+    "@controllers": "dst/controllers",
+    "@middlewares": "dst/middleware",
+    "@factory": "dst/factory"
+  }
+}

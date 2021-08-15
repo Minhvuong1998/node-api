@@ -1,0 +1,163 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/2.0/configuration-reference
+version: 2.1
+orbs:
+  node: circleci/node@3.0.0
+  slack: circleci/slack@4.1
+  heroku: circleci/heroku@0.0.10
+jobs:
+  check:
+    docker:
+      - image: circleci/node:12.13.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys: 
+            - v1-dependencies-{{ checksum "package-lock.json" }}
+      - run: 
+          name: check format
+          command: |
+            npm install
+            npm run check
+            npm run build
+      - save_cache:
+          key: v1-dependencies-{{ checksum "package-lock.json" }}
+          paths:
+          - node_modules
+      - slack/notify:
+          event: fail
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Testing failure ! :skull: *\n:star: \n \n Here is notification from circleCI"
+                  },
+                  "accessory": {
+                    "type": "image",
+                    "image_url": "https://assets.brandfolder.com/q1z07w-113hxk-b29oc1/v/7755924/original/fail-build.png",
+                    "alt_text": "c"
+                  }
+                },
+                {
+                  "type": "divider"
+                }
+              ]
+            }
+      - slack/notify:
+          event: pass
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Testing Successful ! :tada: *\n:star::star::star::star: \n \n Here is notification from circleCI"
+                  },
+                  "accessory": {
+                    "type": "image",
+                    "image_url": "https://assets.brandfolder.com/q1yzlj-eypchs-3zozet/v/7755881/original/green-build.png",
+                    "alt_text": "c"
+                  }
+                },
+                {
+                  "type": "divider"
+                }
+              ]
+            }
+  deploy-aws:
+    machine:
+      enabled: true
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "85:2d:8a:ec:46:24:c5:0a:82:cb:bd:a2:2d:fc:cb:f4"
+      - run:
+          name: pull code and start api_services
+          command: ssh -oStrictHostKeyChecking=no ec2-user@3.143.216.10 -p 22 "cd /home/ec2-user/nodejs-aws-circleci; git pull origin main; npm install;pm2 restart all"
+  deploy-heroku:
+    # machine:
+    #   enabled: true
+    executor: heroku/default
+    steps:
+      - checkout
+      - heroku/install
+      # - run:
+          # name: deploy main to heroku
+      - heroku/deploy-via-git
+      - slack/notify:
+          event: fail
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Deployment failure ! :skull: *\n:star: \n \n Here is notification from circleCI"
+                  },
+                  "accessory": {
+                    "type": "image",
+                    "image_url": "https://assets.brandfolder.com/q1z07w-113hxk-b29oc1/v/7755924/original/fail-build.png",
+                    "alt_text": "c"
+                  }
+                },
+                {
+                  "type": "divider"
+                }
+              ]
+            }
+      - slack/notify:
+          event: pass
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Deployment Successful ! :tada: *\n:star::star::star::star: \n \n Here is notification from circleCI"
+                  },
+                  "accessory": {
+                    "type": "image",
+                    "image_url": "https://assets.brandfolder.com/q1yzlj-eypchs-3zozet/v/7755881/original/green-build.png",
+                    "alt_text": "c"
+                  }
+                },
+                {
+                  "type": "divider"
+                }
+              ]
+            }
+workflows:
+  my-flow:
+    jobs:
+      - check:
+          filters:
+            branches:
+              ignore:
+                - develop
+          context: SLACK_NOTIFICATION
+      - deploy-heroku:
+          # requires:
+          #   - check
+          filters:
+            branches:
+              only:
+                - develop
+          context: SLACK_NOTIFICATION
+      

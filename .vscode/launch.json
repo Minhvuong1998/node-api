@@ -1,0 +1,24 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Launch Program",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}\\dst\\server.js",
+            "outFiles": [
+                "${workspaceFolder}/dst/**/*.js"
+            ],
+            "env": {
+                "HASH_SECRET": "blog-api-secret-passphrase",
+                "MONGODB_URI": "mongodb+srv://blog:LH2Lp1i7jJC9UUeZ@cluster0.whvcp.mongodb.net/blog?retryWrites=true&w=majority"
+            }
+        }
+    ]
+}
